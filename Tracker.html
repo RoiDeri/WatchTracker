@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch Tracker · Shinobi Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf2ee;
+    --bg-2: #f5ebe2;
+    --surface: #ffffff;
+    --surface2: #f4e8e0;
+    --border: #e6d3c3;
+    --border-soft: #efe1d4;
+    --orange: #e86018;
+    --orange-dim: #c04810;
+    --orange-soft: #fbe3d3;
+    --gold: #c88810;
+    --gold-dim: #a07008;
+    --red: #d84040;
+    --blue: #4890d0;
+    --green: #38a870;
+    --purple: #7850c0;
+    --text: #1c1430;
+    --text-muted: #56487a;
+    --text-dim: #8878a8;
+    --filler-color: #8858c0;
+    --canon-color: #4890d0;
+    --mixed-color: #c88810;
+    --movie-color: #d84040;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 2px rgba(60,30,10,0.06), 0 2px 8px rgba(80,50,140,0.05);
+    --shadow: 0 2px 4px rgba(60,30,10,0.04), 0 8px 32px rgba(80,50,140,0.10);
+    --shadow-lg: 0 4px 8px rgba(60,30,10,0.06), 0 24px 60px rgba(80,50,140,0.16);
+    --font-display: sans-serif;
+    --font-ui: sans-serif;
+    --font-mono: sans-serif;
+    --series-orange: var(--orange);
+    --series-blue: var(--blue);
+    --series-gold: var(--gold);
+  }
+
+  /* TOP NAV */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    background: color-mix(in oklab, var(--bg) 78%, transparent);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .topnav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: var(--text);
+  }
+  .brand-mark {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--orange), var(--gold));
+    display: grid; place-items: center;
+    color: white; font-family: var(--font-display); font-weight: 900;
+    font-size: 14px; letter-spacing: 0.04em;
+    box-shadow: 0 4px 14px rgba(232,96,24,0.35), inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .brand-name {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 17px; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .brand-sub {
+    font-family: var(--font-ui); font-weight: 500;
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-top: -2px;
+  }
+  .nav-links {
+    margin-left: 24px;
+    display: flex; gap: 4px;
+  }
+  .nav-link {
+    font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--text); }
+  .nav-link.active::after {
+    content: ''; position: absolute;
+    left: 14px; right: 14px; bottom: 2px;
+    height: 2px; border-radius: 2px;
+    background: var(--orange);
+  }
+  .nav-spacer { flex: 1; }
+  .nav-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-pill:hover { border-color: var(--orange); color: var(--orange); transform: translateY(-1px); }
+  .nav-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--orange);
+    box-shadow: 0 0 8px rgba(232,96,24,0.6);
+  }
+
+  /* SIDEBAR TOGGLE BUTTON (legacy, hidden – replaced by nav pill) */
+  .sidebar-toggle { display: none; }
+  .sidebar-toggle.sb-open { left: 306px; }
+
+  /* SIDEBAR PANEL */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 340px;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(.22,1,.36,1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 40px rgba(60,30,10,0.10);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(28,20,48,0.18);
+    backdrop-filter: blur(2px);
+    z-index: 199;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+  .sidebar-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .sidebar-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: all 0.18s ease;
+  }
+  .sidebar-close:hover { color: var(--orange); border-color: var(--orange); }
+
+  .sidebar-body { padding: 22px 24px 32px; flex: 1; }
+
+  .sb-section { margin-bottom: 32px; }
+  .sb-section-title {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .sb-series-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .sb-series-label {
+    font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+    width: 84px; flex-shrink: 0;
+  }
+  .sb-bar-track { flex: 1; height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden; }
+  .sb-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(.22,1,.36,1); }
+  .sb-bar-naruto    { background: linear-gradient(90deg, var(--orange), #f59038); }
+  .sb-bar-shippuden { background: linear-gradient(90deg, var(--blue), #6ab0ee); }
+  .sb-bar-movies    { background: linear-gradient(90deg, var(--gold), #e8b040); }
+  .sb-series-pct {
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 500;
+    color: var(--text-muted);
+    width: 38px; text-align: right; flex-shrink: 0;
+  }
+
+  .chart-empty {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-style: italic;
+    text-align: center;
+    padding: 24px 0;
+    line-height: 1.6;
+  }
+
+  /* DARK MODE OVERRIDES */
+  html.dark {
+    --bg: #0e0c1a;
+    --bg-2: #14122a;
+    --surface: #1a1830;
+    --surface2: #232140;
+    --border: #363258;
+    --border-soft: #2a2748;
+    --text: #f0eaf8;
+    --text-muted: #b8a8d0;
+    --text-dim: #7868a0;
+    --orange-soft: rgba(232,96,24,0.18);
+    --series-orange: #ff8c4a;
+    --series-blue: #7bb6e8;
+    --series-gold: #f0c060;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+    --shadow: 0 2px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.35);
+    --shadow-lg: 0 4px 8px rgba(0,0,0,0.4), 0 24px 60px rgba(0,0,0,0.5);
+  }
+  html.dark .topnav {
+    background: color-mix(in oklab, var(--bg) 78%, transparent);
+    border-bottom-color: rgba(255,255,255,0.06);
+  }
+  html.dark body::before {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(232,98,26,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(26,110,181,0.14) 0%, transparent 60%);
+  }
+  html.dark header h1 {
+    text-shadow: none;
+  }
+  html.dark header h1 span {
+    text-shadow: none;
+  }
+  html.dark .ep-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
+  html.dark .ep-row:hover { background: rgba(255,255,255,0.03); }
+  html.dark .ep-row.watched { background: transparent; }
+  html.dark .badge-canon  { background: rgba(72,144,208,0.15);  color: #a0ccf0; border: 1px solid rgba(72,144,208,0.3); }
+  html.dark .badge-filler { background: rgba(120,80,192,0.15);  color: #c8a8f0; border: 1px solid rgba(120,80,192,0.3); }
+  html.dark .badge-mixed  { background: rgba(200,136,16,0.15);  color: #e8c860; border: 1px solid rgba(200,136,16,0.3); }
+  html.dark .badge-movie  { background: rgba(216,64,64,0.15);   color: #f0a0a0; border: 1px solid rgba(216,64,64,0.3); }
+  html.dark .ep-canon  { color: rgba(168,216,248,0.85); background: rgba(144,200,240,0.1); }
+  html.dark .ep-filler { color: rgba(216,184,248,0.85); background: rgba(200,160,232,0.1); }
+  html.dark .ep-movie  { color: rgba(248,176,176,0.85); background: rgba(240,136,136,0.1); }
+
+  /* DARK MODE TOGGLE BUTTON – using nav-pill styling */
+  .dark-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.06em;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+  .dark-toggle:hover { border-color: var(--orange); color: var(--orange); transform: translateY(-1px); }
+  .dark-toggle .dt-moon,
+  .dark-toggle .dt-sun {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  .dark-toggle .dt-sun { display: none; color: var(--gold); }
+  html.dark .dark-toggle .dt-moon { display: none; }
+  html.dark .dark-toggle .dt-sun { display: inline-block; }
+  .dark-toggle:hover .dt-moon { transform: rotate(-15deg); }
+  .dark-toggle:hover .dt-sun  { transform: rotate(45deg); }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 5%,  rgba(232,100,30,0.14)  0%, transparent 55%),
+      radial-gradient(ellipse 60% 80% at 85% 90%, rgba(72,144,208,0.10)  0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(200,140,80,0.05)  0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Subtle paper grain */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    z-index: 0;
+  }
+  html.dark body::after { mix-blend-mode: screen; opacity: 0.25; }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 96px 0 56px;
+    margin-bottom: 40px;
+    position: relative;
+    isolation: isolate;
+  }
+  .hero-bg {
+    position: absolute;
+    left: 50%;
+    top: -40px;
+    transform: translateX(-50%);
+    width: min(720px, 92vw);
+    aspect-ratio: 1 / 1;
+    background-image: url('assets/naruto-bg.png');
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+    z-index: -1;
+    opacity: 0.22;
+    filter: saturate(0.7) blur(1.5px);
+    -webkit-mask-image: radial-gradient(ellipse 70% 78% at 50% 38%, #000 0%, #000 25%, transparent 78%);
+            mask-image: radial-gradient(ellipse 70% 78% at 50% 38%, #000 0%, #000 25%, transparent 78%);
+    pointer-events: none;
+  }
+  .hero-fade {
+    position: absolute;
+    left: 0; right: 0; bottom: -80px;
+    height: 260px;
+    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 35%, transparent 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  html.dark .hero-bg {
+    opacity: 0.26;
+    filter: saturate(0.75) blur(1.5px) brightness(1.05);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    width: 72px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  }
+
+  .header-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-eyebrow::before,
+  .header-eyebrow::after {
+    content: '';
+    width: 28px; height: 1px;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  header h1 {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 8vw, 88px);
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    line-height: 0.95;
+    position: relative;
+  }
+
+  header h1 span {
+    background: linear-gradient(135deg, var(--series-orange), var(--series-gold) 70%, var(--series-orange));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-sub {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 18px;
+    letter-spacing: 0.02em;
+  }
+  .header-sub b { color: var(--text); font-weight: 600; }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 24px 8px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 0;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .stats-bar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--orange), var(--gold), var(--blue), var(--purple));
+    opacity: 0.85;
+  }
+
+  @media(max-width:640px) {
+    .stats-bar { grid-template-columns: 1fr 1fr; gap: 16px 0; padding: 20px 4px; }
+    .stat + .stat:nth-child(3) { border-left: none; }
+  }
+
+  .stat {
+    text-align: center;
+    padding: 6px 12px;
+    position: relative;
+  }
+  .stat + .stat::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 14%; bottom: 14%;
+    width: 1px;
+    background: var(--border-soft);
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 42px);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.muted { color: var(--text-muted); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 20px 28px 22px;
+    margin-bottom: 36px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .progress-label span:last-child {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+  }
+
+  .progress-track {
+    height: 10px;
+    background: var(--bg-2);
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: inset 0 1px 2px rgba(60,30,10,0.08);
+  }
+  html.dark .progress-track { background: rgba(0,0,0,0.35); box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); }
+
+  .progress-fill-canon {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--gold));
+    transition: width 0.6s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 0 12px rgba(232,96,24,0.4);
+  }
+  .progress-fill-filler {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), #a878e0);
+    transition: width 0.6s cubic-bezier(.22,1,.36,1);
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .controls-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-right: 6px;
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .filter-btn:hover { background: var(--surface2); color: var(--text); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--orange), #ff7a30);
+    color: white;
+    box-shadow: 0 4px 12px rgba(232,96,24,0.32);
+    font-weight: 700;
+  }
+
+  .controls-sep { width: 1px; height: 24px; background: var(--border-soft); margin: 0 8px; }
+
+  /* SERIES SECTION */
+  .series-section { margin-bottom: 64px; }
+
+  .series-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-soft);
+    position: relative;
+  }
+  .series-header::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -1px;
+    width: 64px; height: 2px;
+    border-radius: 2px;
+    background: var(--orange);
+  }
+  #series-shippuden .series-header::after { background: var(--blue); }
+  #series-movies .series-header::after { background: var(--gold); }
+
+  .series-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .series-title.orange { color: var(--series-orange); }
+  .series-title.blue { color: var(--series-blue); }
+  .series-title.gold { color: var(--series-gold); }
+
+  .series-count {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .series-progress {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+  }
+
+  /* ARC */
+  .arc {
+    margin-bottom: 14px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.18s, transform 0.18s;
+  }
+  .arc:hover { box-shadow: var(--shadow); }
+
+  .arc-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .arc-header::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 14px; bottom: 14px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--blue);
+    opacity: 0.85;
+  }
+  .arc[data-arc-type="filler"] .arc-header::before { background: var(--filler-color); }
+  .arc[data-arc-type="mixed"] .arc-header::before  { background: var(--gold); }
+  .arc[data-arc-type="movie"] .arc-header::before  { background: var(--red); }
+
+  .arc-header:hover { background: var(--surface2); }
+
+  .arc-toggle {
+    font-size: 10px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    transition: transform 0.22s ease, background 0.18s;
+  }
+  .arc-header:hover .arc-toggle { background: var(--bg-2); color: var(--orange); }
+  .arc.collapsed .arc-toggle { transform: rotate(-90deg); }
+
+  /* SPOILER WRAP */
+  .spoiler-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+  .spoiler-wrap .arc-name { transition: filter 0.45s ease, color 0.45s ease; }
+  .spoiler-wrap.spoilered .arc-name {
+    color: transparent !important;
+    filter: blur(7px);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* Pill is centered within the spoiler-wrap (the flex region between the toggle and the badge) */
+  .spoiler-wrap .spoiler-pill {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(40, 28, 60, 0.92);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: background 0.18s, opacity 0.55s ease, transform 0.55s cubic-bezier(.22,1,.36,1), filter 0.45s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  html.dark .spoiler-wrap .spoiler-pill { background: rgba(10, 8, 22, 0.92); border: 1px solid rgba(255,255,255,0.08); }
+  .spoiler-wrap.spoilered .spoiler-pill {
+    opacity: 1;
+    pointer-events: auto;
+    filter: blur(0);
+    transition: background 0.18s, opacity 0.18s, transform 0.18s;
+  }
+  /* When un-spoilered, pill softly fades + scales out + blurs */
+  .spoiler-wrap:not(.spoilered) .spoiler-pill {
+    transform: translate(-50%, -50%) scale(0.85);
+    filter: blur(2px);
+  }
+  .spoiler-wrap .spoiler-pill:hover {
+    background: rgba(232,96,24,0.92);
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  /* Tiny re-blur button: appears on hover after reveal */
+  .respoil-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 3px 6px;
+    margin-left: 4px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.18s, color 0.18s, background 0.18s;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .arc-header:hover:not(:has(.spoiler-wrap.spoilered)) .respoil-btn { opacity: 0.7; }
+  .respoil-btn:hover { opacity: 1 !important; color: var(--orange); background: var(--bg-2); }
+  .arc-header:has(.spoiler-wrap.spoilered) .respoil-btn { display: none; }
+
+  .arc-name {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    flex: 1;
+    color: var(--text);
+  }
+
+  .arc-badge {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    min-width: 68px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .badge-canon  { background: rgba(72,144,208,0.12); color: #2870b0; border: 1px solid rgba(72,144,208,0.35); }
+  .badge-filler { background: rgba(120,80,192,0.12); color: #5830a0; border: 1px solid rgba(120,80,192,0.35); }
+  .badge-mixed  { background: rgba(200,136,16,0.12); color: #9a6808; border: 1px solid rgba(200,136,16,0.35); }
+  .badge-movie  { background: rgba(216,64,64,0.12); color: #a82828; border: 1px solid rgba(216,64,64,0.35); }
+
+  .arc-eps {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+    min-width: 88px;
+    text-align: right;
+  }
+  .arc-check-all {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--bg-2);
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+    padding: 5px 12px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    transition: all 0.18s;
+    letter-spacing: 0.04em;
+  }
+  .arc-check-all:hover {
+    color: white;
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+
+  .arc-mini-bar {
+    height: 3px;
+    background: var(--border-soft);
+    overflow: hidden;
+  }
+  .arc-mini-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--gold));
+    transition: width 0.5s cubic-bezier(.22,1,.36,1);
+  }
+
+  .arc-body {
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .arc.collapsed .arc-body,
+  .arc.collapsed .arc-mini-bar { display: none; }
+
+  /* EPISODE RATING (IMDB) */
+  .ep-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-2);
+    border: 1px solid var(--border-soft);
+    padding: 3px 8px 3px 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    min-width: 56px;
+    justify-content: center;
+  }
+  .ep-rating:hover {
+    border-color: #e8b040;
+    color: var(--text);
+    transform: translateY(-1px);
+  }
+  .ep-rating .star {
+    width: 11px; height: 11px;
+    color: #f0b820;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 2px rgba(240,184,32,0.45));
+  }
+  .ep-rating.empty {
+    color: var(--text-dim);
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.5;
+  }
+  .ep-rating.empty .star { color: var(--text-dim); filter: none; opacity: 0.4; }
+  .ep-row.watched .ep-rating { opacity: 0.42; }
+
+  /* EPISODE ROW */
+  .ep-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border-soft);
+    transition: background 0.12s, padding 0.12s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .ep-row:hover { background: var(--bg-2); padding-left: 24px; }
+  .ep-row.watched { background: transparent; }
+  .ep-row.watched .ep-title,
+  .ep-row.watched .ep-num { opacity: 0.42; }
+  .ep-row.watched .ep-title { text-decoration: line-through; }
+
+  .ep-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+    transition: all 0.18s cubic-bezier(.22,1,.36,1);
+    background: var(--surface);
+  }
+
+  .ep-row:hover .ep-check { border-color: var(--orange); }
+  .ep-row.watched .ep-check {
+    background: linear-gradient(135deg, var(--orange), #f5832e);
+    border-color: var(--orange);
+    box-shadow: 0 2px 6px rgba(232,96,24,0.35);
+  }
+
+  .ep-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    width: 56px;
+    flex-shrink: 0;
+    text-align: right;
+    letter-spacing: 0.02em;
+  }
+
+  .ep-title {
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.005em;
+  }
+
+  .ep-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .ep-title a:hover { color: var(--orange); }
+
+  .ep-type {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .ep-canon  { color: #2870b0; background: rgba(72,144,208,0.10); }
+  .ep-filler { color: #6030a0; background: rgba(120,80,192,0.10); }
+  .ep-movie  { color: #a82828; background: rgba(216,64,64,0.10); }
+
+  /* HIDDEN BY FILTER */
+  .ep-row.hidden-filter { display: none; }
+  .arc.all-hidden { display: none; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 40px 0 8px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border-soft);
+    margin-top: 24px;
+  }
+  footer .heart { color: var(--orange); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="Home.html" class="brand">
+      <div class="brand-mark">忍</div>
+      <div>
+        <div class="brand-name">Shinobi Log</div>
+        <div class="brand-sub">Watch Tracker</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="Home.html" class="nav-link">Home</a>
+      <a href="Tracker.html" class="nav-link active">Tracker</a>
+    </div>
+    <div class="nav-spacer"></div>
+    <button class="nav-pill" id="sidebar-toggle"><span class="dot"></span>Stats</button>
+    <button class="dark-toggle" id="dark-toggle" aria-label="Toggle theme">
+      <svg class="dt-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      <svg class="dt-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line></svg>
+      <span id="dark-label">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title">Statistics</span>
+    <button class="sidebar-close" id="sidebar-close">×</button>
+  </div>
+  <div class="sidebar-body">
+    <div class="sb-section">
+      <div class="sb-section-title">Series Progress</div>
+      <div class="sb-series-row">
+        <span class="sb-series-label">Naruto</span>
+        <div class="sb-bar-track"><div class="sb-bar-fill sb-bar-naruto" id="sb-bar-n" style="width:0%"></div></div>
+        <span class="sb-series-pct" id="sb-pct-n">0%</span>
+      </div>
+      <div class="sb-series-row">
+        <span class="sb-series-label">Shippuden</span>
+        <div class="sb-bar-track"><div class="sb-bar-fill sb-bar-shippuden" id="sb-bar-s" style="width:0%"></div></div>
+        <span class="sb-series-pct" id="sb-pct-s">0%</span>
+      </div>
+      <div class="sb-series-row">
+        <span class="sb-series-label">Movies</span>
+        <div class="sb-bar-track"><div class="sb-bar-fill sb-bar-movies" id="sb-bar-m" style="width:0%"></div></div>
+        <span class="sb-series-pct" id="sb-pct-m">0%</span>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-title">Progress Over Time</div>
+      <div id="chart-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+<header>
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-fade" aria-hidden="true"></div>
+  <div class="header-eyebrow">OriLeo's Shinobi Log</div>
+  <h1><span>NARUTO</span><br>Watch Tracker</h1>
+  <div class="header-sub">Original Series · Shippuden · Movies — <b>every episode, every arc</b></div>
+</header>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value orange" id="stat-watched">0</div>
+    <div class="stat-label">Watched</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value muted" id="stat-remaining">0</div>
+    <div class="stat-label">Remaining</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value gold" id="stat-canon">0</div>
+    <div class="stat-label">Canon Watched</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value green" id="stat-pct">0%</div>
+    <div class="stat-label">Complete</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Overall Progress</span>
+    <span id="prog-label">0 / 0 episodes</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill-canon" id="prog-canon" style="width:0%"></div>
+    <div class="progress-fill-filler" id="prog-filler" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <span class="controls-label">Filter:</span>
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="canon">Canon Only</button>
+  <button class="filter-btn" data-filter="filler">Filler Only</button>
+  <button class="filter-btn" data-filter="unwatched">Unwatched</button>
+  <div class="controls-sep"></div>
+  <button class="filter-btn" id="reset-btn" style="border-color:#d84040;color:#d84040;">Reset All</button>
+  <button class="filter-btn" id="collapse-btn">Expand All</button>
+</div>
+
+<!-- ==================== NARUTO ORIGINAL ==================== -->
+<div class="series-section" id="series-naruto">
+  <div class="series-header">
+    <div class="series-title orange">Naruto</div>
+    <div class="series-count">Original Series · 220 Episodes</div>
+    <div class="series-progress" id="prog-naruto">0 / 220</div>
+  </div>
+
+  <!-- Arc 1 -->
+  <div class="arc" id="arc-0">
+    <div class="arc-header" onclick="toggleArc(0)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Land of Waves Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 1–19</span>
+      <button class="arc-check-all" onclick="checkAll(0, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-0"></div></div>
+    <div class="arc-body" id="arc-body-0"></div>
+  </div>
+
+  <div class="arc" id="arc-1">
+    <div class="arc-header" onclick="toggleArc(1)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Chunin Exams Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 20–67</span>
+      <button class="arc-check-all" onclick="checkAll(1, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-1"></div></div>
+    <div class="arc-body" id="arc-body-1"></div>
+  </div>
+
+  <div class="arc" id="arc-2">
+    <div class="arc-header" onclick="toggleArc(2)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Konoha Crush Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 68–80</span>
+      <button class="arc-check-all" onclick="checkAll(2, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-2"></div></div>
+    <div class="arc-body" id="arc-body-2"></div>
+  </div>
+
+  <div class="arc" id="arc-3">
+    <div class="arc-header" onclick="toggleArc(3)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Search for Tsunade Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 81–100</span>
+      <button class="arc-check-all" onclick="checkAll(3, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-3"></div></div>
+    <div class="arc-body" id="arc-body-3"></div>
+  </div>
+
+  <div class="arc" id="arc-4">
+    <div class="arc-header" onclick="toggleArc(4)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Land of Tea Arc</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 101–106</span>
+      <button class="arc-check-all" onclick="checkAll(4, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-4"></div></div>
+    <div class="arc-body" id="arc-body-4"></div>
+  </div>
+
+  <div class="arc" id="arc-5">
+    <div class="arc-header" onclick="toggleArc(5)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Sasuke Retrieval Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 107–135</span>
+      <button class="arc-check-all" onclick="checkAll(5, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-5"></div></div>
+    <div class="arc-body" id="arc-body-5"></div>
+  </div>
+
+  <div class="arc" id="arc-6">
+    <div class="arc-header" onclick="toggleArc(6)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Land of Rice Fields Arc</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 136–142</span>
+      <button class="arc-check-all" onclick="checkAll(6, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-6"></div></div>
+    <div class="arc-body" id="arc-body-6"></div>
+  </div>
+
+  <div class="arc" id="arc-7">
+    <div class="arc-header" onclick="toggleArc(7)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Chunin Exam Retake Arc</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 143–219</span>
+      <button class="arc-check-all" onclick="checkAll(7, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-7"></div></div>
+    <div class="arc-body" id="arc-body-7"></div>
+  </div>
+
+  <div class="arc" id="arc-8">
+    <div class="arc-header" onclick="toggleArc(8)">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Epilogue</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 220</span>
+      <button class="arc-check-all" onclick="checkAll(8, event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-8"></div></div>
+    <div class="arc-body" id="arc-body-8"></div>
+  </div>
+</div>
+
+<!-- ==================== SHIPPUDEN ==================== -->
+<div class="series-section" id="series-shippuden">
+  <div class="series-header">
+    <div class="series-title blue">Naruto Shippuden</div>
+    <div class="series-count">Part II · 500 Episodes</div>
+    <div class="series-progress" id="prog-shippuden">0 / 500</div>
+  </div>
+
+  <div class="arc" id="arc-s1">
+    <div class="arc-header" onclick="toggleArc('s1')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Kazekage Rescue Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 1–32</span>
+      <button class="arc-check-all" onclick="checkAll('s1', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s1"></div></div>
+    <div class="arc-body" id="arc-body-s1"></div>
+  </div>
+
+  <div class="arc" id="arc-s3">
+    <div class="arc-header" onclick="toggleArc('s3')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Tenchi Bridge Reconnaissance Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 33–53</span>
+      <button class="arc-check-all" onclick="checkAll('s3', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s3"></div></div>
+    <div class="arc-body" id="arc-body-s3"></div>
+  </div>
+
+  <div class="arc" id="arc-s2">
+    <div class="arc-header" onclick="toggleArc('s2')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Twelve Guardian Ninja Arc</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 54–71</span>
+      <button class="arc-check-all" onclick="checkAll('s2', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s2"></div></div>
+    <div class="arc-body" id="arc-body-s2"></div>
+  </div>
+
+  <div class="arc" id="arc-s4">
+    <div class="arc-header" onclick="toggleArc('s4')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Akatsuki Suppression Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 72–90</span>
+      <button class="arc-check-all" onclick="checkAll('s4', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s4"></div></div>
+    <div class="arc-body" id="arc-body-s4"></div>
+  </div>
+
+  <div class="arc" id="arc-s5">
+    <div class="arc-header" onclick="toggleArc('s5')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Three-Tails Arc</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 91–112</span>
+      <button class="arc-check-all" onclick="checkAll('s5', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s5"></div></div>
+    <div class="arc-body" id="arc-body-s5"></div>
+  </div>
+
+  <div class="arc" id="arc-s6">
+    <div class="arc-header" onclick="toggleArc('s6')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Itachi Pursuit / Fated Battle Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 113–143</span>
+      <button class="arc-check-all" onclick="checkAll('s6', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s6"></div></div>
+    <div class="arc-body" id="arc-body-s6"></div>
+  </div>
+
+  <div class="arc" id="arc-s7">
+    <div class="arc-header" onclick="toggleArc('s7')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Six-Tails Unleashed</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 144–151</span>
+      <button class="arc-check-all" onclick="checkAll('s7', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s7"></div></div>
+    <div class="arc-body" id="arc-body-s7"></div>
+  </div>
+
+  <div class="arc" id="arc-s8">
+    <div class="arc-header" onclick="toggleArc('s8')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Pain's Assault Arc</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 152–175</span>
+      <button class="arc-check-all" onclick="checkAll('s8', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s8"></div></div>
+    <div class="arc-body" id="arc-body-s8"></div>
+  </div>
+
+  <div class="arc" id="arc-s10">
+    <div class="arc-header" onclick="toggleArc('s10')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Past Arc: The Locus of Konoha</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 176–196</span>
+      <button class="arc-check-all" onclick="checkAll('s10', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s10"></div></div>
+    <div class="arc-body" id="arc-body-s10"></div>
+  </div>
+
+  <div class="arc" id="arc-s9">
+    <div class="arc-header" onclick="toggleArc('s9')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Five Kage Summit Arc</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 197–222</span>
+      <button class="arc-check-all" onclick="checkAll('s9', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s9"></div></div>
+    <div class="arc-body" id="arc-body-s9"></div>
+  </div>
+
+  <div class="arc" id="arc-s12">
+    <div class="arc-header" onclick="toggleArc('s12')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Paradise Life on a Boat</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 223–242</span>
+      <button class="arc-check-all" onclick="checkAll('s12', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s12"></div></div>
+    <div class="arc-body" id="arc-body-s12"></div>
+  </div>
+
+  <div class="arc" id="arc-s11">
+    <div class="arc-header" onclick="toggleArc('s11')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Fourth Shinobi World War: Countdown</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 243–256</span>
+      <button class="arc-check-all" onclick="checkAll('s11', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s11"></div></div>
+    <div class="arc-body" id="arc-body-s11"></div>
+  </div>
+
+  <div class="arc" id="arc-s13">
+    <div class="arc-header" onclick="toggleArc('s13')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Fourth Shinobi World War: Confrontation</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 257–289</span>
+      <button class="arc-check-all" onclick="checkAll('s13', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s13"></div></div>
+    <div class="arc-body" id="arc-body-s13"></div>
+  </div>
+
+  <div class="arc" id="arc-s14">
+    <div class="arc-header" onclick="toggleArc('s14')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Power Arc</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 290–295</span>
+      <button class="arc-check-all" onclick="checkAll('s14', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s14"></div></div>
+    <div class="arc-body" id="arc-body-s14"></div>
+  </div>
+
+  <div class="arc" id="arc-s15a">
+    <div class="arc-header" onclick="toggleArc('s15a')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Fourth Shinobi World War: Attackers from Beyond</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 296–320</span>
+      <button class="arc-check-all" onclick="checkAll('s15a', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15a"></div></div>
+    <div class="arc-body" id="arc-body-s15a"></div>
+  </div>
+
+  <div class="arc" id="arc-s15b">
+    <div class="arc-header" onclick="toggleArc('s15b')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Fourth Shinobi World War: Climax (Part 1)</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 321–348</span>
+      <button class="arc-check-all" onclick="checkAll('s15b', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15b"></div></div>
+    <div class="arc-body" id="arc-body-s15b"></div>
+  </div>
+
+  <div class="arc" id="arc-s15c">
+    <div class="arc-header" onclick="toggleArc('s15c')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Kakashi's Anbu Arc: The Shinobi That Lives In The Darkness</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 349–361</span>
+      <button class="arc-check-all" onclick="checkAll('s15c', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15c"></div></div>
+    <div class="arc-body" id="arc-body-s15c"></div>
+  </div>
+
+  <div class="arc" id="arc-s15d">
+    <div class="arc-header" onclick="toggleArc('s15d')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Fourth Shinobi World War: Climax (Part 2)</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 362–377</span>
+      <button class="arc-check-all" onclick="checkAll('s15d', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15d"></div></div>
+    <div class="arc-body" id="arc-body-s15d"></div>
+  </div>
+
+  <div class="arc" id="arc-s15e">
+    <div class="arc-header" onclick="toggleArc('s15e')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Birth of the Ten-Tails' Jinchuriki (Part 1)</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 378–393</span>
+      <button class="arc-check-all" onclick="checkAll('s15e', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15e"></div></div>
+    <div class="arc-body" id="arc-body-s15e"></div>
+  </div>
+
+  <div class="arc" id="arc-s15f">
+    <div class="arc-header" onclick="toggleArc('s15f')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — In Naruto's Footsteps: The Friends' Paths</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 394–413</span>
+      <button class="arc-check-all" onclick="checkAll('s15f', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15f"></div></div>
+    <div class="arc-body" id="arc-body-s15f"></div>
+  </div>
+
+  <div class="arc" id="arc-s15g">
+    <div class="arc-header" onclick="toggleArc('s15g')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Birth of the Ten-Tails' Jinchuriki (Part 2)</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 414–431</span>
+      <button class="arc-check-all" onclick="checkAll('s15g', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s15g"></div></div>
+    <div class="arc-body" id="arc-body-s15g"></div>
+  </div>
+
+  <div class="arc" id="arc-s16">
+    <div class="arc-header" onclick="toggleArc('s16')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Filler — Jiraiya Shinobi Handbook: The Tale of Naruto the Hero</span>
+      <span class="arc-badge badge-filler">Filler</span>
+      <span class="arc-eps">Ep 432–450</span>
+      <button class="arc-check-all" onclick="checkAll('s16', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s16"></div></div>
+    <div class="arc-body" id="arc-body-s16"></div>
+  </div>
+
+  <div class="arc" id="arc-s17">
+    <div class="arc-header" onclick="toggleArc('s17')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Kaguya Ōtsutsuki Strikes Arc</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 451–468</span>
+      <button class="arc-check-all" onclick="checkAll('s17', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s17"></div></div>
+    <div class="arc-body" id="arc-body-s17"></div>
+  </div>
+
+  <div class="arc" id="arc-s18">
+    <div class="arc-header" onclick="toggleArc('s18')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Sasuke Shinden / Birth of Naruto</span>
+      <span class="arc-badge badge-canon">Canon</span>
+      <span class="arc-eps">Ep 469–479</span>
+      <button class="arc-check-all" onclick="checkAll('s18', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s18"></div></div>
+    <div class="arc-body" id="arc-body-s18"></div>
+  </div>
+
+  <div class="arc" id="arc-s19">
+    <div class="arc-header" onclick="toggleArc('s19')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Naruto's Wedding Arc</span>
+      <span class="arc-badge badge-mixed">Mixed</span>
+      <span class="arc-eps">Ep 480–500</span>
+      <button class="arc-check-all" onclick="checkAll('s19', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-s19"></div></div>
+    <div class="arc-body" id="arc-body-s19"></div>
+  </div>
+
+</div><!-- end series-shippuden -->
+
+<!-- ==================== MOVIES ==================== -->
+<div class="series-section" id="series-movies">
+  <div class="series-header">
+    <div class="series-title gold">Movies</div>
+    <div class="series-count">All Films · Chronological Watch Order</div>
+    <div class="series-progress" id="prog-movies">0 / 11</div>
+  </div>
+
+  <div class="arc" id="arc-m1">
+    <div class="arc-header" onclick="toggleArc('m1')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Naruto Films (Part I)</span>
+      <span class="arc-badge badge-movie">Movies</span>
+      <span class="arc-eps">3 Films</span>
+      <button class="arc-check-all" onclick="checkAll('m1', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-m1"></div></div>
+    <div class="arc-body" id="arc-body-m1"></div>
+  </div>
+
+  <div class="arc" id="arc-m2">
+    <div class="arc-header" onclick="toggleArc('m2')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">Naruto Shippuden Films</span>
+      <span class="arc-badge badge-movie">Movies</span>
+      <span class="arc-eps">6 Films</span>
+      <button class="arc-check-all" onclick="checkAll('m2', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-m2"></div></div>
+    <div class="arc-body" id="arc-body-m2"></div>
+  </div>
+
+  <div class="arc" id="arc-m3">
+    <div class="arc-header" onclick="toggleArc('m3')">
+      <span class="arc-toggle">▼</span>
+      <span class="arc-name">The Last &amp; Boruto Films</span>
+      <span class="arc-badge badge-movie">Movies</span>
+      <span class="arc-eps">2 Films</span>
+      <button class="arc-check-all" onclick="checkAll('m3', event)">Check All</button>
+    </div>
+    <div class="arc-mini-bar"><div class="arc-mini-fill" id="arc-bar-m3"></div></div>
+    <div class="arc-body" id="arc-body-m3"></div>
+  </div>
+</div>
+
+<footer>
+  Built with <span class="heart">♥</span> for fellow shinobi — progress saved locally in your browser
+</footer>
+</div><!-- end wrapper -->
+
+<script src="data.js"></script>
+<script src="ratings.js"></script>
+<script>
+// ============================================================
+// Data loaded from data.js
+
+// ============================================================
+// RENDER
+// ============================================================
+const _N_BASE  = 'https://shippuden.co.il/%D7%A4%D7%A8%D7%A7%D7%99%D7%9D/%d7%a0%d7%90%d7%a8%d7%95%d7%98%d7%95-%d7%a4%d7%a8%d7%a7-';
+const _S_BASE  = 'https://shippuden.co.il/%D7%A4%D7%A8%D7%A7%D7%99%D7%9D/%d7%a0%d7%90%d7%a8%d7%95%d7%98%d7%95-%d7%a9%d7%99%d7%a4%d7%95%d7%93%d7%9f-%d7%a4%d7%a8%d7%a7-';
+const MOVIE_URLS = {
+  'Film 1':  'https://shippuden.co.il/נארוטו-סרט-1-נסיכת-השלג/',
+  'Film 2':  'https://shippuden.co.il/נארוטו-סרט-2-אשליית-הרס-כדור-הארץ/',
+  'Film 3':  'https://shippuden.co.il/נארוטו-סרט-3-מהומת-חיות-אי-הירח/',
+  'Film 4':  'https://shippuden.co.il/שיפודן-סרט-1-הסרט/',
+  'Film 5':  'https://shippuden.co.il/שיפודן-סרט-2-קשרים/',
+  'Film 6':  'https://shippuden.co.il/שיפודן-סרט-3-יורשי-רצון-האש/',
+  'Film 7':  'https://shippuden.co.il/שיפודן-סרט-4-המגדל-האבוד/',
+  'Film 8':  'https://shippuden.co.il/שיפודן-סרט-5-כלא-הדם/',
+  'Film 9':  'https://shippuden.co.il/שיפודן-סרט-6-הדרך-אל-הנינגה/',
+  'Film 10': 'https://shippuden.co.il/ש-סרט-7-נארוטו-האחרון/',
+  'Film 11': 'https://shippuden.co.il/בורוטו-נארוטו-הסרט/',
+};
+
+function epUrl(ep, series) {
+  let url = null;
+  if (series === 'naruto')    url = _N_BASE + ep.num + '/';
+  if (series === 'shippuden') url = _S_BASE + ep.num + '/';
+  if (series === 'movies')    url = MOVIE_URLS[ep.num] || null;
+  if (!url) return ep.title;
+  return `<a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${ep.title}</a>`;
+}
+
+const STAR_SVG = `<svg class="star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.95 6.6 7.05.65-5.3 4.95L18.4 22 12 18.27 5.6 22l1.7-7.8L2 9.25l7.05-.65L12 2z"/></svg>`;
+
+function epRatingBadge(ep, series) {
+  const rating = (window.EP_RATINGS || {})[ep.id];
+  let url = null;
+  if (series === 'naruto')    url = _N_BASE + ep.num + '/';
+  if (series === 'shippuden') url = _S_BASE + ep.num + '/';
+  if (series === 'movies')    url = MOVIE_URLS[ep.num] || null;
+  if (rating == null) {
+    // No rating yet — show muted placeholder linked to the IMDB page
+    const tag = url ? 'a' : 'span';
+    const attrs = url ? ` href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"` : '';
+    return `<${tag} class="ep-rating empty" title="No rating data yet — click to view on IMDB"${attrs}>${STAR_SVG}<span>—</span></${tag}>`;
+  }
+  const fixed = rating.toFixed(1);
+  if (url) {
+    return `<a class="ep-rating" href="${url}" target="_blank" rel="noopener noreferrer" title="IMDB rating ${fixed}/10 — view episode page" onclick="event.stopPropagation()">${STAR_SVG}<span>${fixed}</span></a>`;
+  }
+  return `<span class="ep-rating" title="IMDB rating ${fixed}/10">${STAR_SVG}<span>${fixed}</span></span>`;
+}
+
+function renderAll() {
+  Object.keys(ARCS).forEach(arcId => {
+    const arc = ARCS[arcId];
+    const body = document.getElementById(`arc-body-${arcId}`);
+    if (!body) return;
+    body.innerHTML = arc.eps.map(ep => `
+      <div class="ep-row ${watched[ep.id] ? 'watched' : ''}" 
+           id="ep-${ep.id}" 
+           data-id="${ep.id}" 
+           data-type="${ep.type}"
+           onclick="toggleEp('${ep.id}', '${arcId}')">
+        <div class="ep-check">${watched[ep.id] ? '✓' : ''}</div>
+        <div class="ep-num">${ep.num}</div>
+        <div class="ep-title">${epUrl(ep, arc.series)}</div>
+        ${epRatingBadge(ep, arc.series)}
+        <div class="ep-type ep-${ep.type}">${ep.type}</div>
+      </div>
+    `).join('');
+  });
+  updateStats();
+  applyFilter(currentFilter);
+}
+
+function toggleEp(id, arcId) {
+  if (watched[id]) {
+    delete watched[id];
+  } else {
+    watched[id] = Date.now();
+  }
+  save();
+  const isWatched = !!watched[id];
+  const row = document.getElementById(`ep-${id}`);
+  if (row) {
+    row.classList.toggle('watched', isWatched);
+    row.querySelector('.ep-check').textContent = isWatched ? '✓' : '';
+  }
+  updateStats();
+  updateArcBar(arcId);
+}
+
+function checkAll(arcId, e) {
+  e.stopPropagation();
+  const arc = ARCS[arcId];
+  const allWatched = arc.eps.every(ep => watched[ep.id]);
+  const now = Date.now();
+  arc.eps.forEach(ep => {
+    if (allWatched) {
+      delete watched[ep.id];
+    } else if (!watched[ep.id]) {
+      watched[ep.id] = now;
+    }
+    const isWatched = !!watched[ep.id];
+    const row = document.getElementById(`ep-${ep.id}`);
+    if (row) {
+      row.classList.toggle('watched', isWatched);
+      row.querySelector('.ep-check').textContent = isWatched ? '✓' : '';
+    }
+  });
+  save();
+  updateStats();
+  updateArcBar(arcId);
+}
+
+function updateArcBar(arcId) {
+  const arc = ARCS[arcId];
+  const total = arc.eps.length;
+  const done = arc.eps.filter(ep => watched[ep.id]).length;
+  const bar = document.getElementById(`arc-bar-${arcId}`);
+  if (bar) bar.style.width = total ? `${(done/total)*100}%` : '0%';
+}
+
+function toggleArc(arcId) {
+  const el = document.getElementById(`arc-${arcId}`);
+  if (el) el.classList.toggle('collapsed');
+}
+
+function updateStats() {
+  let total = 0, done = 0, canonDone = 0, canonTotal = 0;
+  let nTotal = 0, nDone = 0, sTotal = 0, sDone = 0, mTotal = 0, mDone = 0;
+
+  Object.keys(ARCS).forEach(arcId => {
+    const arc = ARCS[arcId];
+    arc.eps.forEach(ep => {
+      total++;
+      if (arc.series === 'naruto') nTotal++;
+      else if (arc.series === 'shippuden') sTotal++;
+      else mTotal++;
+      if (ep.type === 'canon' || ep.type === 'movie') canonTotal++;
+      if (watched[ep.id]) {
+        done++;
+        if (arc.series === 'naruto') nDone++;
+        else if (arc.series === 'shippuden') sDone++;
+        else mDone++;
+        if (ep.type === 'canon' || ep.type === 'movie') canonDone++;
+      }
+    });
+    updateArcBar(arcId);
+  });
+
+  document.getElementById('stat-watched').textContent = done;
+  document.getElementById('stat-remaining').textContent = total - done;
+  document.getElementById('stat-canon').textContent = canonDone;
+  document.getElementById('stat-pct').textContent = total ? Math.round((done/total)*100) + '%' : '0%';
+  document.getElementById('prog-label').textContent = `${done} / ${total} episodes`;
+
+  const pctCanon = total ? (canonDone/total)*100 : 0;
+  const pctFiller = total ? ((done - canonDone)/total)*100 : 0;
+  document.getElementById('prog-canon').style.width = pctCanon + '%';
+  document.getElementById('prog-filler').style.width = pctFiller + '%';
+
+  document.getElementById('prog-naruto').textContent = `${nDone} / ${nTotal}`;
+  document.getElementById('prog-shippuden').textContent = `${sDone} / ${sTotal}`;
+  document.getElementById('prog-movies').textContent = `${mDone} / ${mTotal}`;
+
+  const sbBars = [
+    { bar: 'sb-bar-n', pct: 'sb-pct-n', done: nDone, total: nTotal },
+    { bar: 'sb-bar-s', pct: 'sb-pct-s', done: sDone, total: sTotal },
+    { bar: 'sb-bar-m', pct: 'sb-pct-m', done: mDone, total: mTotal },
+  ];
+  sbBars.forEach(({ bar, pct, done, total }) => {
+    const p = total ? Math.round((done / total) * 100) : 0;
+    const barEl = document.getElementById(bar);
+    const pctEl = document.getElementById(pct);
+    if (barEl) barEl.style.width = p + '%';
+    if (pctEl) pctEl.textContent = p + '%';
+  });
+  renderChart();
+}
+
+function renderChart() {
+  const wrap = document.getElementById('chart-wrap');
+  if (!wrap) return;
+
+  const timestamps = Object.values(watched)
+    .filter(v => typeof v === 'number' && v > 0)
+    .sort((a, b) => a - b);
+  const legacyCount = Object.values(watched).filter(v => v === true).length;
+
+  if (timestamps.length === 0 && legacyCount === 0) {
+    wrap.innerHTML = '<p class="chart-empty">Mark episodes as watched to see your progress over time.</p>';
+    return;
+  }
+  if (timestamps.length === 0) {
+    wrap.innerHTML = `<p class="chart-empty">${legacyCount} episodes tracked — mark new ones to build the chart.</p>`;
+    return;
+  }
+
+  const dayMap = {};
+  timestamps.forEach(ts => {
+    const d = new Date(ts);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    dayMap[key] = { date: new Date(d.getFullYear(), d.getMonth(), d.getDate()), count: (dayMap[key]?.count || 0) + 1 };
+  });
+
+  const days = Object.values(dayMap).sort((a, b) => a.date - b.date);
+  let cum = legacyCount;
+  const series = days.map(({ date, count }) => { cum += count; return { date, count: cum }; });
+
+  // Prepend a zero-point one day before the first entry
+  const start = new Date(series[0].date);
+  start.setDate(start.getDate() - 1);
+  series.unshift({ date: start, count: legacyCount });
+
+  const W = 252, H = 220;
+  const pad = { top: 10, right: 10, bottom: 28, left: 36 };
+  const cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
+
+  const minT = series[0].date.getTime(), maxT = series[series.length - 1].date.getTime();
+  const maxC = series[series.length - 1].count || 1;
+  const rangeT = maxT - minT || 1;
+
+  const sx = d => pad.left + ((d.getTime() - minT) / rangeT) * cw;
+  const sy = c => pad.top + ch - (c / maxC) * ch;
+
+  const pathD = series.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.date).toFixed(1)},${sy(p.count).toFixed(1)}`).join(' ');
+  const fillD = `${pathD} L${sx(series[series.length-1].date).toFixed(1)},${(pad.top+ch).toFixed(1)} L${sx(series[0].date).toFixed(1)},${(pad.top+ch).toFixed(1)} Z`;
+
+  const fmt = d => `${d.getDate()}/${d.getMonth()+1}`;
+  const yTicks = [0, Math.round(maxC / 2), maxC];
+  const yGridSVG = yTicks.map(v => `
+    <line x1="${pad.left}" y1="${sy(v).toFixed(1)}" x2="${pad.left+cw}" y2="${sy(v).toFixed(1)}" stroke="var(--border)" stroke-width="1"/>
+    <text x="${pad.left-4}" y="${sy(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="var(--text-dim)" font-size="9">${v}</text>`).join('');
+
+  const xTickSVG = [series[0], series[series.length-1]].map(p => `
+    <text x="${sx(p.date).toFixed(1)}" y="${pad.top+ch+14}" text-anchor="middle" fill="var(--text-dim)" font-size="9">${fmt(p.date)}</text>`).join('');
+
+  const dotsSVG = series.slice(1).map(p => `
+    <circle cx="${sx(p.date).toFixed(1)}" cy="${sy(p.count).toFixed(1)}" r="2.5" fill="var(--orange)" stroke="var(--surface)" stroke-width="1.5"/>`).join('');
+
+  wrap.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">
+    ${yGridSVG}${xTickSVG}
+    <path d="${fillD}" fill="var(--orange)" opacity="0.12"/>
+    <path d="${pathD}" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dotsSVG}
+  </svg>`;
+}
+
+function applyFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn[data-filter]').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+
+  document.querySelectorAll('.ep-row').forEach(row => {
+    let show = true;
+    const type = row.dataset.type;
+    const isWatched = row.classList.contains('watched');
+    if (f === 'canon' && type === 'filler') show = false;
+    if (f === 'filler' && type !== 'filler') show = false;
+    if (f === 'unwatched' && isWatched) show = false;
+    row.classList.toggle('hidden-filter', !show);
+  });
+
+  // hide arcs where everything is filtered out
+  document.querySelectorAll('.arc').forEach(arcEl => {
+    const visible = arcEl.querySelectorAll('.ep-row:not(.hidden-filter)').length > 0;
+    arcEl.classList.toggle('all-hidden', !visible);
+  });
+}
+
+// Filter button listeners
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+document.getElementById('collapse-btn').addEventListener('click', () => {
+  const arcs = document.querySelectorAll('.arc');
+  const anyExpanded = [...arcs].some(el => !el.classList.contains('collapsed'));
+  arcs.forEach(el => el.classList.toggle('collapsed', anyExpanded));
+  document.getElementById('collapse-btn').textContent = anyExpanded ? 'Expand All' : 'Collapse All';
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    watched = {};
+    save();
+    renderAll();
+  }
+});
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+const sidebar = document.getElementById('sidebar');
+const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+const sidebarCloseBtn = document.getElementById('sidebar-close');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+function setSidebar(open) {
+  sidebar.classList.toggle('open', open);
+  sidebarBackdrop.classList.toggle('open', open);
+  try { localStorage.setItem('naruto-sidebar', open ? '1' : '0'); } catch(e) {}
+}
+
+sidebarToggleBtn.addEventListener('click', () => setSidebar(!sidebar.classList.contains('open')));
+sidebarCloseBtn.addEventListener('click', () => setSidebar(false));
+sidebarBackdrop.addEventListener('click', () => setSidebar(false));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && sidebar.classList.contains('open')) setSidebar(false);
+});
+
+// ============================================================
+// DARK MODE
+// ============================================================
+const darkToggleBtn = document.getElementById('dark-toggle');
+const darkLabel = document.getElementById('dark-label');
+if (localStorage.getItem('naruto-theme') === 'dark') {
+  document.documentElement.classList.add('dark');
+  if (darkLabel) darkLabel.textContent = 'Light';
+}
+darkToggleBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  if (darkLabel) darkLabel.textContent = isDark ? 'Light' : 'Dark';
+  try { localStorage.setItem('naruto-theme', isDark ? 'dark' : 'light'); } catch(e) {}
+});
+
+// Tag arcs with type based on badge class for accent stripes
+document.querySelectorAll('.arc').forEach(arc => {
+  const badge = arc.querySelector('.arc-badge');
+  if (!badge) return;
+  if (badge.classList.contains('badge-filler')) arc.dataset.arcType = 'filler';
+  else if (badge.classList.contains('badge-mixed')) arc.dataset.arcType = 'mixed';
+  else if (badge.classList.contains('badge-movie')) arc.dataset.arcType = 'movie';
+  else arc.dataset.arcType = 'canon';
+});
+
+// ============================================================
+// SPOILER BLUR for arc names (Discord-style)
+// ============================================================
+let revealedArcs = {};
+try { revealedArcs = JSON.parse(localStorage.getItem('naruto-revealed-arcs') || '{}'); } catch(e) {}
+const saveRevealed = () => {
+  try { localStorage.setItem('naruto-revealed-arcs', JSON.stringify(revealedArcs)); } catch(e) {}
+};
+
+document.querySelectorAll('.arc').forEach(arc => {
+  const arcId = arc.id; // e.g. arc-0, arc-s5, arc-m1
+  // Skip movies entirely — no spoilers for film titles
+  if (arcId.startsWith('arc-m')) return;
+
+  const header = arc.querySelector('.arc-header');
+  const name = arc.querySelector('.arc-name');
+  if (!header || !name) return;
+
+  // Wrap arc-name so the blur+color transition is isolated
+  const wrap = document.createElement('span');
+  wrap.className = 'spoiler-wrap';
+  name.parentNode.insertBefore(wrap, name);
+  wrap.appendChild(name);
+
+  // Pill anchored to the spoiler-wrap so it centers within the space between the toggle arrow and the badge
+  const pill = document.createElement('button');
+  pill.type = 'button';
+  pill.className = 'spoiler-pill';
+  pill.textContent = 'SPOILER';
+  pill.setAttribute('aria-label', 'Reveal arc name');
+  wrap.appendChild(pill);
+
+  // Small re-blur button next to the arc-name (visible only when revealed, on hover)
+  const respoil = document.createElement('button');
+  respoil.type = 'button';
+  respoil.className = 'respoil-btn';
+  respoil.setAttribute('aria-label', 'Hide arc name again');
+  respoil.title = 'Hide again';
+  respoil.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>`;
+  wrap.parentNode.insertBefore(respoil, wrap.nextSibling);
+
+  const setSpoiler = (on) => {
+    wrap.classList.toggle('spoilered', on);
+  };
+
+  setSpoiler(!revealedArcs[arcId]);
+
+  const reveal = (e) => {
+    e.stopPropagation();
+    if (!wrap.classList.contains('spoilered')) return;
+    setSpoiler(false);
+    revealedArcs[arcId] = 1;
+    saveRevealed();
+  };
+  const hide = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (wrap.classList.contains('spoilered')) return;
+    setSpoiler(true);
+    delete revealedArcs[arcId];
+    saveRevealed();
+  };
+
+  pill.addEventListener('click', reveal);
+  name.addEventListener('click', (e) => {
+    if (wrap.classList.contains('spoilered')) reveal(e);
+  });
+  respoil.addEventListener('click', hide);
+  // Right-click anywhere on the wrap also re-spoilers
+  wrap.addEventListener('contextmenu', hide);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+renderAll();
+document.querySelectorAll('.arc').forEach(el => el.classList.add('collapsed'));
+</script>
+</body>
+</html>
